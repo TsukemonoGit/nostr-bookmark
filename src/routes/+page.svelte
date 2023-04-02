@@ -10,7 +10,7 @@
      */
     let bookmarkList=[];
 
-    let relayName = "wss://nostream.localtest.me/"; //"wss://relay.damus.io";
+    let relayName = "";//"wss://nostream.localtest.me/"; //"wss://relay.damus.io";
     let copyRelayName = ""; //"wss://nostream.localtest.me/";
     let connectMessage = "";
     let connectMessage2 = "";
@@ -31,7 +31,6 @@
         bookmarkList = [];
         connectMessage = "通信中";
         relayName = relayName.trim(); //空白除去
-        let str = relayName.slice(0, 6); //始まりがwss://かチェック
 
         const relay = relayInit(relayName);
 
@@ -49,15 +48,16 @@
             if (!pub_obj.isSuccess) {
                 errorMessage2 = pub_obj.connectMessage;
                 return;
-            } else{author=pub_obj.author;}
+            } else{
+                author=pub_obj.author;
+            }
         }
 
         bookmarkList = await listenForEvent(relay);
         
         console.log(`bookmark:${bookmarkList}`);
 
-        // `bookmarkList`を使って、必要な処理を行う
-    }
+    }//----------------------------------------------clickButton
 
     /**
      * @param {import("nostr-tools").Relay} relay
@@ -110,7 +110,7 @@
             await relay.connect();
         } catch (error) {
             bool = false;
-            message = `リレーが見つかりません。リレーアドレスを確認してください`;
+            message = `リレーが見つかりません。アドレスを確認してください`;
             console.log(message);
         }
         return {
@@ -143,7 +143,7 @@
                 tags: bookmarkList,
                 content: "",
             });
-            event.id = getEventHash(event);
+            //event.id = getEventHash(event);
             let pub = relay2.publish(event);
             pub.on("ok", () => {
                 console.log(`${relay2.url} has accepted our event`);
