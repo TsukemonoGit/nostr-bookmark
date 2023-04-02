@@ -142,7 +142,7 @@
                 tags: bookmarkList,
                 content: "",
             });
-            //event.id = getEventHash(event);
+            event.id = getEventHash(event);
             let pub = relay2.publish(event);
             pub.on("ok", () => {
                 console.log(`${relay2.url} has accepted our event`);
