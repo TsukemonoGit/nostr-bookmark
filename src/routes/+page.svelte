@@ -268,6 +268,11 @@
         </div>
   
     {/if}
+    <hr/>
+    <div id="footer">
+    Github: <a href="https://github.com/TsukemonoGit/nostr-bookmark">TsukemonoGit/nostr-bookmark</a> <br>
+    Author: <a href="https://nostx.shino3.net/npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw">mono(Nostr)</a>
+</div>
 </main>
 
 <!---------------------------------------------------------->
@@ -305,5 +310,11 @@
       margin-bottom: 15px;
       padding: 5px 15px 5px 15px;
         border: solid 1px lightgray;
+    }
+    #footer{
+        color:rgb(70, 70, 70);
+    }
+    #footer a:link ,a:visited{
+        color:gray
     }
 </style>
