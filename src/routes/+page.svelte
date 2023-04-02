@@ -5,11 +5,17 @@
 
     import { bech32encode } from "../lib/bech32";
 
+   
+    /**
+     * @type {import("nostr-tools").Event}
+     */
+    let bookmarkListObj;
+    
     /**
      * @type {string | any[]}
      */
-    let bookmarkList=[];
-
+    let bookmarkList;
+    let category="bookmark";
     let relayName = "";//"wss://nostream.localtest.me/"; //"wss://relay.damus.io";
     let copyRelayName = ""; //"wss://nostream.localtest.me/";
     let connectMessage = "";
@@ -28,7 +34,8 @@
         bookmark1_length = 0;
         errorMessage = "";
         errorMessage2="";
-        bookmarkList = [];
+        bookmarkList=[];
+        
         connectMessage = "通信中";
         relayName = relayName.trim(); //空白除去
 
@@ -53,9 +60,9 @@
             }
         }
 
-        bookmarkList = await listenForEvent(relay);
-        
-        console.log(`bookmark:${bookmarkList}`);
+        bookmarkListObj = await listenForEvent(relay);
+        bookmarkList=bookmarkListObj.tags;
+        console.log(`bookmark:${bookmarkListObj}`);
 
     }//----------------------------------------------clickButton
 
@@ -72,13 +79,15 @@
             return new Promise((resolve) => {
                 isView = true;
                 sub.on("event", (event) => {
+                    console.log(event);
+                    if(event.tags[0][1]===category){
                     bookmark1_length = event.tags.length - 1;
                     if (bookmark1_length < 0) {
                         bookmark1_length = 0;
                         errorMessage2="ブクマ保存されてないっぽい！";
                     }
-                    resolve(event.tags);
-                    
+                    resolve(event);
+                }
                     //connectMessage="";
                 });
                 sub.on("eose", () => {
@@ -139,8 +148,8 @@
                 kind: 30001,
                 pubkey: author,
                 created_at: Math.floor(Date.now() / 1000),
-                tags: bookmarkList,
-                content: "",
+                tags: bookmarkListObj.tags,
+                content: bookmarkListObj.content,
             });
             event.id = getEventHash(event);
             let pub = relay2.publish(event);
@@ -211,6 +220,14 @@
             style="min-width:350px"
         />
 
+       取得するブックマークのカテゴリ名（デフォルトはbookmark)
+       pinにするとSnortのピン留めリストがみれるよ:
+        <input
+            type="text"
+            bind:value={category}
+            placeholder="bookmark"
+            style="min-width:350px"
+        />
         <button on:click={clickButton}> BookmarkListを取得</button>
     </div>
     <hr />
