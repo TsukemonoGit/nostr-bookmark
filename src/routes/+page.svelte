@@ -314,7 +314,11 @@
     #footer{
         color:rgb(70, 70, 70);
     }
-    #footer a:link ,a:visited{
+    #footer a:hover{
+        color:rgb(255, 155, 155)
+    }
+    #footer a:active ,a:visited{
         color:gray
     }
+    
 </style>
