@@ -84,10 +84,9 @@
                 sub.on("eose", () => {
                     if (bookmark1_length <= 0) {
                         bookmark1_length = 0;
-                        errorMessage2="ブクマ保存されてないっぽい！";
-                    
+                        errorMessage2="ブクマ保存されてないっぽい！";              
                     }
-                    // connectMessage="ブクマ保存されてないっぽい！"
+      
                 });
             });
         }
