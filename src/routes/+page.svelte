@@ -184,7 +184,7 @@
     <div class = "gaiyou">
     <p>kind:30001に保存されている公開ブックマークをリレーからリレーに移植</p>
     <ul>
-        <li>自分の公開鍵、適当なリレーあとレスを入れてそのリレーに保存されているブックマークを取得</li>
+        <li>自分の公開鍵、適当なリレーURLを入れて、そのリレーに保存されているブックマークを取得</li>
         <li>
             拡散したい（上書きしたい）リレーを選択して、保存</li> 
             <li>署名するためにnip-7拡張機能を使います
@@ -303,6 +303,7 @@
     }
     .gaiyou{
       margin: 10px ;
+      margin-bottom: 15px;
       padding: 5px 15px 5px 15px;
         border: solid 1px lightgray;
     }
