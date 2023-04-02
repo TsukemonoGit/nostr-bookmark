@@ -10,12 +10,12 @@
      */
     export let bookmarkList;
 
-    let relayName = "wss://nostream.localtest.me/"; //"wss://relay.damus.io";
-    let copyRelayName = "wss://nostream.localtest.me/";
+    let relayName = "";//"wss://nostream.localtest.me/"; //"wss://relay.damus.io";
+    let copyRelayName = "";//"wss://nostream.localtest.me/";
     let connectMessage = "";
     let connectMessage2 = "";
-    let pubkey =
-        "npub12egp0pvh2f0fp6sk5nt6ncehqzkz8zsma8dl8agf8p3f98v6resqku4w26";
+    let pubkey ="";
+       // "npub12egp0pvh2f0fp6sk5nt6ncehqzkz8zsma8dl8agf8p3f98v6resqku4w26";
     //"npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw";
     let author = "";
     let bookmark1_length=0;
