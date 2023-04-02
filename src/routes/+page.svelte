@@ -5,10 +5,11 @@
 
     import { bech32encode } from "../lib/bech32";
 
+    
     /**
-     * @type {string[][]}
+     * @type {string | any[]}
      */
-    export let bookmarkList;
+    let bookmarkList;
 
     let relayName = "";//"wss://nostream.localtest.me/"; //"wss://relay.damus.io";
     let copyRelayName = "";//"wss://nostream.localtest.me/";
@@ -165,7 +166,7 @@
     <input
         type="text"
         bind:value={pubkey}
-        placeholder="ブクマ確認したい人のnpubかhexたぶんどっちでもおけ"
+        placeholder="npub or hex"
         style="min-width:600px"
     />
 
