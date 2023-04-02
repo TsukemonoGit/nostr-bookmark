@@ -317,7 +317,7 @@
     #footer a:hover{
         color:rgb(255, 155, 155)
     }
-    #footer a:active ,a:visited{
+    #footer a:active ,a:visited ,a:link{
         color:gray
     }
     
