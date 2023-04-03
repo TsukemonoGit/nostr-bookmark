@@ -106,15 +106,34 @@
             // @ts-ignore
             let subb = relay.sub(sub);
 
-            subb.on("event", (event) => {
+            const result=await getEventwithCount(subb,bookmarkCount,events);
+           bookmarkCount=result.bookmarkCount;
+           events=result.events;
+            if (bookmarkCount.length === 0){
+                console.log("イベント全部取れたよ");
+                break;
+            }else
+            if(bookmarkCount.length===imakoko ){
+                console.log("イベント全部取れてないけどこのリレーにはもうないかも！");
+                break;
+            }
+            imakoko=bookmarkCount.length;
+        }
+        console.log(events);
+    }
+/**
+     * @param {any[]} bookmarkCount
+     * @param {import("nostr-tools").Event[]} events
+     */
+// @ts-ignore
+async function getEventwithCount(subb,bookmarkCount,events){
+    subb.on("event", (/** @type {import("nostr-tools").Event}*/ event) => {
                 //   console.log("we got the event we wanted:", event);
 
                 bookmarkCount.forEach(function (element, index) {
                     if (event.id === element) {
                         events.push(event);
                         bookmarkCount.splice(index,1);
-                       
-                        return;
                     }
                 });
             });
@@ -123,20 +142,8 @@
                 console.log(`eose:${bookmarkCount.length}`);
                  subb.unsub();//イベントの購読を停止
             });
-           
-            if (bookmarkCount.length === 0){
-                console.log("イベント全部取れたよ");
-                break;
-            }else
-            if(bookmarkCount.length===imakoko ){
-                console.log("イベント全部取れてないけどこのリレーにはもうない！");
-                break;
-            }
-            imakoko=bookmarkCount.length;
-        }
-        console.log(events);
-    }
-
+            return {bookmarkCount,events}
+}
     /**
      * @param {import("nostr-tools").Relay} relay
      */
