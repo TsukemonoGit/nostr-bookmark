@@ -75,7 +75,7 @@
         if (bookmark1_length <= 0) return;
         const bookmarkObjs = bookmarkList.slice(1);
         const bookmarkS = bookmarkObjs.map((tag) => tag[1]);
-        console.log(bookmarkS);
+     //   console.log(bookmarkS);
         //const test = bookmarks[1][1];
 
         //console.log(sub);
@@ -114,11 +114,12 @@
                 break;
             }else
             if(bookmarkCount.length===imakoko ){
-                console.log("イベント全部取れてないけどこのリレーにはもうないかも！");
+                console.log("イベント全部取れてないけどこのリレーにはもうないかも??");
                 break;
             }
             imakoko=bookmarkCount.length;
         }
+        console.log("↓イベントの中身↓")
         console.log(events);
     }
 /**
