@@ -23,6 +23,7 @@
         "npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw";
     let errorMessage = "";
     let errorMessage2 = "";
+    let errorMessage3 = "";
 
     // "npub12egp0pvh2f0fp6sk5nt6ncehqzkz8zsma8dl8agf8p3f98v6resqku4w26";
     //"npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw";
@@ -30,10 +31,13 @@
     let bookmark1_length = 0;
     let isView = false;
     async function clickButton() {
+        //各値初期化
         isView = false; //一旦結果表示の部分非表示に
         bookmark1_length = 0;
         errorMessage = "";
         errorMessage2 = "";
+        errorMessage3="";
+        connectMessage2="";
         bookmarkList = [];
 
         connectMessage = "通信中";
@@ -153,39 +157,53 @@
 
     //------------------------------------------------
     async function clickCopyButton() {
+        //メッセージリセット
+        errorMessage3="";
+        connectMessage2="";
         //リレーにつなぐ
         const relay2 = relayInit(copyRelayName);
-        try {
-            await ConnectRelay(relay2);
-            connectMessage2 = `connected to ${copyRelayName}`;
+           const result= await ConnectRelay(relay2);
+           if(!result.success){
+            errorMessage3=("リレーへの接続に失敗しました");
+        return;   
+        } 
+        //コネクト成功
+           connectMessage2 = `connected to ${copyRelayName}`;
             await publishEvent(relay2);
-        } catch (error) {
-            connectMessage2 = `failed to connect to ${copyRelayName}`;
-            return;
-        }
+        
 
         // @ts-ignore
         async function publishEvent(relay2) {
             //署名してコピー
             // @ts-ignore
-            const event = await window.nostr.signEvent({
-                kind: 30001,
-                pubkey: author,
-                created_at: Math.floor(Date.now() / 1000),
-                tags: bookmarkListObj.tags,
-                content: bookmarkListObj.content,
-             });
-           event.id = getEventHash(event);
-            let pub = relay2.publish(event);
-            pub.on("ok", () => {
-                console.log(`${relay2.url} has accepted our event`);
-                connectMessage2 = `${relay2.url} has accepted our event`;
-            });
-            // @ts-ignore
-            pub.on("failed", (reason) => {
-                console.log(`failed to publish to ${relay2.url}: ${reason}`);
-                connectMessage2 = `failed to publish to ${relay2.url}: ${reason}`;
-            });
+            try {
+                // @ts-ignore
+                const event = await window.nostr.signEvent({
+                    kind: 30001,
+                    pubkey: author,
+                    created_at: Math.floor(Date.now() / 1000),
+                    tags: bookmarkListObj.tags,
+                    content: bookmarkListObj.content,
+                });
+
+                event.id = getEventHash(event);
+                let pub = relay2.publish(event);
+                connectMessage2="通信中";
+                pub.on("ok", () => {
+                    console.log(`${relay2.url} has accepted our event`);
+                    connectMessage2 = `${relay2.url} has accepted our event`;
+                });
+                // @ts-ignore
+                pub.on("failed", (reason) => {
+                    console.log(
+                        `failed to publish to ${relay2.url}: ${reason}`
+                    );
+                    errorMessage3 = `failed to publish to ${relay2.url}: ${reason}`;
+                });
+            } catch (error) {
+                errorMessage3 = "拡張機能の要求が拒否されました";
+                return;
+            }
         }
     }
 
@@ -214,7 +232,9 @@
     <h2>Nostrのブックマークのバックアープ</h2>
     <div class="gaiyou">
         <p>
-            <strong style="color:red">開発途中です！ブクマ消失する可能性有り取り扱い注意！！</strong><br>
+            <strong style="color:red"
+                >開発途中です！ブクマ消失する可能性有り取り扱い注意！！</strong
+            ><br />
             kind:30001に保存されている公開ブックマークをリレーからリレーに移植
         </p>
         <ul>
@@ -305,7 +325,12 @@
                 {#if connectMessage2.length == 0}
                     <div style="margin:50px" />
                 {/if}
-                <p>{connectMessage2}</p>
+                {#if errorMessage3.length > 0}
+                    <div class="error-message">{errorMessage3}</div>
+                {/if}
+                {#if errorMessage3.length == 0}
+                    <div class="message">{connectMessage2}</div>
+                {/if}
                 <hr />
             {/if}
         </div>
