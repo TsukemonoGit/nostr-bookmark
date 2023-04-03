@@ -5,22 +5,22 @@
 
     import { bech32encode } from "../lib/bech32";
 
-   
     /**
      * @type {import("nostr-tools").Event}
      */
     let bookmarkListObj;
-    
+
     /**
      * @type {string | any[]}
      */
     let bookmarkList;
-    let category="bookmark";
-    let relayName = "";//"wss://nostream.localtest.me/"; //"wss://relay.damus.io";
+    let category = "bookmark";
+    let relayName = "wss://relay.nostrich.land"; //"wss://nostream.localtest.me/"; //"wss://relay.damus.io";
     let copyRelayName = ""; //"wss://nostream.localtest.me/";
     let connectMessage = "";
     let connectMessage2 = "";
-    let pubkey = "";
+    let pubkey =
+        "npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw";
     let errorMessage = "";
     let errorMessage2 = "";
 
@@ -33,9 +33,9 @@
         isView = false; //一旦結果表示の部分非表示に
         bookmark1_length = 0;
         errorMessage = "";
-        errorMessage2="";
-        bookmarkList=[];
-        
+        errorMessage2 = "";
+        bookmarkList = [];
+
         connectMessage = "通信中";
         relayName = relayName.trim(); //空白除去
 
@@ -49,22 +49,47 @@
         //-----以下コネクト成功-------
         //------ブクマ取得＆表示------
         connectMessage = connect_obj.message;
-        author=pubkey;
-        if ( pubkey.slice(0, 4) === "npub") {
+        author = pubkey;
+        if (pubkey.slice(0, 4) === "npub") {
             const pub_obj = CreateHex(author);
             if (!pub_obj.isSuccess) {
                 errorMessage2 = pub_obj.connectMessage;
                 return;
-            } else{
-                author=pub_obj.author;
+            } else {
+                author = pub_obj.author;
             }
         }
 
         bookmarkListObj = await listenForEvent(relay);
-        bookmarkList=bookmarkListObj.tags;
-        console.log(`bookmark:${bookmarkListObj}`);
+        bookmarkList = bookmarkListObj.tags;
+        //
+        //console.log(`bookmark:${bookmarkListObj}`);
+        //console.log(`bookmarkList.tags${bookmarkList}`)
+        //----------------------------------------------------リストの各IDから各イベントを取得しに行く
+        //まず形を整える
+        //ids:["あいでぃー","ID2","ID3",...]の形にする
+        if (bookmark1_length <= 0) return;
+        const bookmarks = bookmarkList.slice(1);
+        const bookmarkS = bookmarks.map((tag) => tag[1]);
+        console.log(bookmarkS);
+        const test = bookmarks[1][1];
+        /**
+         * @type {string | import("nostr-tools").Filter[]}
+         */
+        let sub = [{ ids: [] }];
+        // @ts-ignore
+        sub[0].ids = bookmarkS;
+        console.log(sub);
+        let subb = relay.sub(sub);
+        subb.on("event", (event) => {
+            console.log("we got the event we wanted:", event);
+        });
+        subb.on("eose", () => {
+            subb.unsub();
+        });
+    }
 
-    }//----------------------------------------------clickButton
+    //----------------------------------------------clickButton
 
     /**
      * @param {import("nostr-tools").Relay} relay
@@ -76,29 +101,28 @@
                 authors: [author],
             },
         ]);
-            return new Promise((resolve) => {
-                isView = true;
-                sub.on("event", (event) => {
-                    console.log(event);
-                    if(event.tags[0][1]===category){
+        return new Promise((resolve) => {
+            isView = true;
+            sub.on("event", (event) => {
+                console.log(event);
+                if (event.tags[0][1] === category) {
                     bookmark1_length = event.tags.length - 1;
                     if (bookmark1_length < 0) {
                         bookmark1_length = 0;
-                        errorMessage2="ブクマ保存されてないっぽい！";
+                        errorMessage2 = "ブクマ保存されてないっぽい！";
                     }
                     resolve(event);
                 }
-                    //connectMessage="";
-                });
-                sub.on("eose", () => {
-                    if (bookmark1_length <= 0) {
-                        bookmark1_length = 0;
-                        errorMessage2="ブクマ保存されてないっぽい！";              
-                    }
-      
-                });
+                //connectMessage="";
             });
-        }
+            sub.on("eose", () => {
+                if (bookmark1_length <= 0) {
+                    bookmark1_length = 0;
+                    errorMessage2 = "ブクマ保存されてないっぽい！";
+                }
+            });
+        });
+    }
     // @ts-ignore
     async function ConnectRelay(relay) {
         let bool = false;
@@ -187,21 +211,22 @@
 
 <!-------------------------------------------------------------------->
 <main>
-    
     <h2>Nostrのブックマークのバックアープ</h2>
-    <div class = "gaiyou">
-    <p>kind:30001に保存されている公開ブックマークをリレーからリレーに移植</p>
-    <ul>
-        <li>自分の公開鍵、適当なリレーURLを入れて、そのリレーに保存されているブックマークを取得</li>
-        <li>
-            拡散したい（上書きしたい）リレーを選択して、保存</li> 
-            <li>署名するためにnip-7拡張機能を使います
-        </li>
-        <li>
-            たまに普段使わないリレーに送信しておいたりしたらいいかもしれません 
-    </li>
-    </ul>
-</div>
+    <div class="gaiyou">
+        <p>
+            kind:30001に保存されている公開ブックマークをリレーからリレーに移植
+        </p>
+        <ul>
+            <li>
+                自分の公開鍵、適当なリレーURLを入れて、そのリレーに保存されているブックマークを取得
+            </li>
+            <li>拡散したい（上書きしたい）リレーを選択して、保存</li>
+            <li>署名するためにnip-7拡張機能を使います</li>
+            <li>
+                たまに普段使わないリレーに送信しておいたりしたらいいかもしれません
+            </li>
+        </ul>
+    </div>
     <!-------------------------------------------------------------------->
     <div class="content">
         pubkey:
@@ -220,8 +245,8 @@
             style="min-width:350px"
         />
 
-       取得するブックマークのカテゴリ名（デフォルトはbookmark)
-       pinにするとSnortのピン留めリストがみれるよ:
+        取得するブックマークのカテゴリ名（デフォルトはbookmark)
+        pinにするとSnortのピン留めリストがみれるよ:
         <input
             type="text"
             bind:value={category}
@@ -245,51 +270,56 @@
     {#if !isView}
         <div id="bookmarkList" />
     {/if}
-    {#if isView }
+    {#if isView}
         <div id="bookmarkList">
             <p>
                 ブックマーク件数:{bookmark1_length}
             </p>
 
             <!-------------------------------------------------------------------->
-            {#if bookmark1_length>0}
-            <details>
-                <summary>イベントIDリスト</summary>
-                <ul class="bcmList">
-                    {#each bookmarkList.slice(1) as bookmark}
-                        <li>{bookmark[1]}</li>
-                    {/each}
-                </ul>
-            </details>
+            {#if bookmark1_length > 0}
+                <details>
+                    <summary>イベントIDリスト</summary>
+                    <ul class="bcmList">
+                        {#each bookmarkList.slice(1) as bookmark}
+                            <li>{bookmark[1]}</li>
+                        {/each}
+                    </ul>
+                </details>
 
-            <!----別のリレーへ-------------------------------------------------------->
-            <hr />
-            <div class="content">
-                to relay:
-                <input
-                    type="text"
-                    bind:value={copyRelayName}
-                    placeholder="wss://..."
-                    style="min-width:250px"
-                />
-            </div>
-            <button on:click={clickCopyButton}>
-                {copyRelayName}に上書き保存</button
-            >
-            {#if connectMessage2.length == 0}
-                <div style="margin:50px" />
-            {/if}
-            <p>{connectMessage2}</p>
-            <hr />
+                <!----別のリレーへ-------------------------------------------------------->
+                <hr />
+                <div class="content">
+                    to relay:
+                    <input
+                        type="text"
+                        bind:value={copyRelayName}
+                        placeholder="wss://..."
+                        style="min-width:250px"
+                    />
+                </div>
+                <button on:click={clickCopyButton}>
+                    {copyRelayName}に上書き保存</button
+                >
+                {#if connectMessage2.length == 0}
+                    <div style="margin:50px" />
+                {/if}
+                <p>{connectMessage2}</p>
+                <hr />
             {/if}
         </div>
-  
     {/if}
-    <hr/>
+    <hr />
     <div id="footer">
-    Github: <a href="https://github.com/TsukemonoGit/nostr-bookmark">TsukemonoGit/nostr-bookmark</a> <br>
-    Author: <a href="https://nostx.shino3.net/npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw">mono(Nostr)</a>
-</div>
+        Github: <a href="https://github.com/TsukemonoGit/nostr-bookmark"
+            >TsukemonoGit/nostr-bookmark</a
+        > <br />
+        Author:
+        <a
+            href="https://nostx.shino3.net/npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw"
+            >mono(Nostr)</a
+        >
+    </div>
 </main>
 
 <!---------------------------------------------------------->
@@ -322,20 +352,21 @@
     .bcmList {
         list-style: decimal-leading-zero;
     }
-    .gaiyou{
-      margin: 10px ;
-      margin-bottom: 15px;
-      padding: 5px 15px 5px 15px;
+    .gaiyou {
+        margin: 10px;
+        margin-bottom: 15px;
+        padding: 5px 15px 5px 15px;
         border: solid 1px lightgray;
     }
-    #footer{
-        color:rgb(70, 70, 70);
+    #footer {
+        color: rgb(70, 70, 70);
     }
-    #footer a:hover{
-        color:rgb(255, 155, 155)
+    #footer a:hover {
+        color: rgb(255, 155, 155);
     }
-    #footer a:active ,a:visited ,a:link{
-        color:gray
+    #footer a:active,
+    a:visited,
+    a:link {
+        color: gray;
     }
-    
 </style>
