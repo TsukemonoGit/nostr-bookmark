@@ -126,11 +126,11 @@
            
             if (bookmarkCount.length === 0){
                 console.log("イベント全部取れたよ");
-                return;
+                break;
             }else
             if(bookmarkCount.length===imakoko ){
                 console.log("イベント全部取れてないけどこのリレーにはもうない！");
-                return;
+                break;
             }
             imakoko=bookmarkCount.length;
         }
