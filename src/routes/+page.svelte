@@ -36,8 +36,8 @@
         bookmark1_length = 0;
         errorMessage = "";
         errorMessage2 = "";
-        errorMessage3="";
-        connectMessage2="";
+        errorMessage3 = "";
+        connectMessage2 = "";
         bookmarkList = [];
 
         connectMessage = "通信中";
@@ -73,35 +73,69 @@
         //まず形を整える
         //ids:["あいでぃー","ID2","ID3",...]の形にする
         if (bookmark1_length <= 0) return;
-        const bookmarks = bookmarkList.slice(1);
-        const bookmarkS = bookmarks.map((tag) => tag[1]);
+        const bookmarkObjs = bookmarkList.slice(1);
+        const bookmarkS = bookmarkObjs.map((tag) => tag[1]);
         console.log(bookmarkS);
-        const test = bookmarks[1][1];
+        //const test = bookmarks[1][1];
+
+        //console.log(sub);
+        const result = getEventList(relay, bookmarkS);
+    }
+
+    //----------------------------------------------clickButton
+    /**
+     * @param { import("nostr-tools").Relay} relay
+     * @param {any[] } bookmarkS
+     */
+    async function getEventList(relay, bookmarkS) {
         /**
          * @type {string | import("nostr-tools").Filter[]}
          */
         let sub = [{ ids: [] }];
-        // @ts-ignore
-        sub[0].ids = bookmarkS;
-        console.log(sub);
-        let subb = relay.sub(sub);
+        
         /**
          * @type {import("nostr-tools").Event[]}
          */
-        let events=[];
-        subb.on("event", (event) => {
-         //   console.log("we got the event we wanted:", event);
-        events.push(event);
-        });
-        subb.on("eose", () => {
-           // subb.unsub();//イベントの購読を停止
-        });
+       
+        let events = [];
+        const maxLoop = 10;
+        let imakoko=bookmarkS.length;
+        let bookmarkCount=bookmarkS;
+        for (let i = 0; i < maxLoop; i++) {
+            sub[0].ids = bookmarkCount;
+            // @ts-ignore
+            let subb = relay.sub(sub);
+
+            subb.on("event", (event) => {
+                //   console.log("we got the event we wanted:", event);
+
+                bookmarkCount.forEach(function (element, index) {
+                    if (event.id === element) {
+                        events.push(event);
+                        bookmarkCount.splice(index,1);
+                       
+                        return;
+                    }
+                });
+            });
+
+            subb.on("eose", () => {
+                console.log(`eose:${bookmarkCount.length}`);
+                 subb.unsub();//イベントの購読を停止
+            });
+           
+            if (bookmarkCount.length === 0){
+                console.log("イベント全部取れたよ");
+                return;
+            }else
+            if(bookmarkCount.length===imakoko ){
+                console.log("イベント全部取れてないけどこのリレーにはもうない！");
+                return;
+            }
+            imakoko=bookmarkCount.length;
+        }
         console.log(events);
-  
-
     }
-
-    //----------------------------------------------clickButton
 
     /**
      * @param {import("nostr-tools").Relay} relay
@@ -167,19 +201,18 @@
     //------------------------------------------------
     async function clickCopyButton() {
         //メッセージリセット
-        errorMessage3="";
-        connectMessage2="";
+        errorMessage3 = "";
+        connectMessage2 = "";
         //リレーにつなぐ
         const relay2 = relayInit(copyRelayName);
-           const result= await ConnectRelay(relay2);
-           if(!result.success){
-            errorMessage3=("リレーへの接続に失敗しました");
-        return;   
-        } 
+        const result = await ConnectRelay(relay2);
+        if (!result.success) {
+            errorMessage3 = "リレーへの接続に失敗しました";
+            return;
+        }
         //コネクト成功
-           connectMessage2 = `connected to ${copyRelayName}`;
-            await publishEvent(relay2);
-        
+        connectMessage2 = `connected to ${copyRelayName}`;
+        await publishEvent(relay2);
 
         // @ts-ignore
         async function publishEvent(relay2) {
@@ -197,7 +230,7 @@
 
                 event.id = getEventHash(event);
                 let pub = relay2.publish(event);
-                connectMessage2="通信中";
+                connectMessage2 = "通信中";
                 pub.on("ok", () => {
                     console.log(`${relay2.url} has accepted our event`);
                     connectMessage2 = `${relay2.url} has accepted our event`;
