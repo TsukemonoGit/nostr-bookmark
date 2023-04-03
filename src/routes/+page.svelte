@@ -174,8 +174,8 @@
                 created_at: Math.floor(Date.now() / 1000),
                 tags: bookmarkListObj.tags,
                 content: bookmarkListObj.content,
-            });
-            event.id = getEventHash(event);
+             });
+           event.id = getEventHash(event);
             let pub = relay2.publish(event);
             pub.on("ok", () => {
                 console.log(`${relay2.url} has accepted our event`);
@@ -214,6 +214,7 @@
     <h2>Nostrのブックマークのバックアープ</h2>
     <div class="gaiyou">
         <p>
+            <strong style="color:red">開発途中です！ブクマ消失する可能性有り取り扱い注意！！</strong><br>
             kind:30001に保存されている公開ブックマークをリレーからリレーに移植
         </p>
         <ul>
