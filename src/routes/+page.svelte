@@ -85,12 +85,20 @@
         sub[0].ids = bookmarkS;
         console.log(sub);
         let subb = relay.sub(sub);
+        /**
+         * @type {import("nostr-tools").Event[]}
+         */
+        let events=[];
         subb.on("event", (event) => {
-            console.log("we got the event we wanted:", event);
+         //   console.log("we got the event we wanted:", event);
+        events.push(event);
         });
         subb.on("eose", () => {
-            subb.unsub();
+           // subb.unsub();//イベントの購読を停止
         });
+        console.log(events);
+  
+
     }
 
     //----------------------------------------------clickButton
@@ -120,10 +128,11 @@
                 //connectMessage="";
             });
             sub.on("eose", () => {
-                if (bookmark1_length <= 0) {
-                    bookmark1_length = 0;
-                    errorMessage2 = "ブクマ保存されてないっぽい！";
-                }
+                sub.unsub();
+                // if (bookmark1_length <= 0) {
+                //     bookmark1_length = 0;
+                //     errorMessage2 = "ブクマ保存されてないっぽい！";
+                // }
             });
         });
     }
