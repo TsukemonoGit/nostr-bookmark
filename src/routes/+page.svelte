@@ -287,6 +287,7 @@ async function getEventwithCount(subb,bookmarkCount,events){
         connectMessage2 = "";
         bookmarkList = [];
         try {
+        // @ts-ignore
         pubkey = await window.nostr.getPublicKey();
         
     } catch (error) {
