@@ -1,7 +1,7 @@
 <script>
     //import * as fs from "fs";
 
-    import { relayInit, getEventHash, signEvent, nip19} from "nostr-tools";
+    import { relayInit, getEventHash, signEvent, nip19 } from "nostr-tools";
 
     import { bech32encode } from "../lib/bech32";
 
@@ -37,7 +37,11 @@
     let isView = false;
 
     //イベント内容検索用リレーたち
-    let RelaysforSeach = ["wss://nostr.wine","wss://universe.nostrich.land/","wss://relay.damus.io"];
+    let RelaysforSeach = [
+        "wss://nostr.wine",
+        "wss://universe.nostrich.land/",
+        "wss://relay.damus.io",
+    ];
 
     async function clickButton() {
         //各値初期化
@@ -48,8 +52,8 @@
         errorMessage3 = "";
         connectMessage2 = "";
         bookmarkList = [];
-         bookmarkIDs=[];
-     bookmarkContents=[];
+        bookmarkIDs = [];
+        bookmarkContents = [];
 
         connectMessage = "通信中";
         relayName = relayName.trim(); //空白除去
@@ -91,11 +95,14 @@
 
         //console.log(sub);
         const result = await getEventList(bookmarkS);
-        const test = result.bookmarkCount[0];
-        console.log(nip19.noteEncode(test));
-        bookmarkContents=result.events.map(e=>e.content);
-        bookmarkIDs=result.events.map(e=>nip19.noteEncode(e.id)).concat(result.bookmarkCount.map(e=>nip19.noteEncode(e)));
-        
+        console.log(`リザルトのとのイベントのながさ${result.events.length}`);
+        bookmarkContents = result.events.map((e) => e.content);
+        console.log(
+            `ぶっくまーくこんてんとのながあさ${bookmarkContents.length}`
+        );
+        bookmarkIDs = result.events
+            .map((e) => nip19.noteEncode(e.id))
+            .concat(result.bookmarkCount.map((e) => nip19.noteEncode(e)));
     }
 
     //----------------------------------------------clickButton
@@ -118,20 +125,24 @@
         let bookmarkCount = bookmarkS;
         //イベント内容取得用のリレーにつなぐ
         //let index=0;
-        for (let j = 0 ; j <RelaysforSeach.length;j++){
+
+        for (let j = 0; j < RelaysforSeach.length; j++) {
             let relay = relayInit(RelaysforSeach[j]);
             const connect_obj = await ConnectRelay(relay);
             if (!connect_obj.success) {
-                
-            }else{
-                
+            } else {
                 for (let i = 0; i < maxLoop; i++) {
                     sub[0].ids = bookmarkCount;
                     // @ts-ignore
                     let subb = relay.sub(sub);
 
-                    const result = await getEventwithCount(subb, bookmarkCount, events);
+                    const result = await getEventwithCount(
+                        subb,
+                        bookmarkCount,
+                        events
+                    );
                     bookmarkCount = result.bookmarkCount;
+                    console.log(`いまここ${bookmarkCount.length}`);
                     events = result.events;
                     if (bookmarkCount.length === 0) {
                         console.log("イベント全部取れたよ");
@@ -143,36 +154,49 @@
                         break;
                     }
                     imakoko = bookmarkCount.length;
+                    //console.log(`いまここ：${imakoko}`)
                 }
             }
         }
         console.log("↓イベントの中身↓");
-        console.log(events);
+        console.log(events); //←ここにはちゃんと全部入ってるように見える
+        console.log(`リターンする前のイベントの長さ${events.length}`); //これはなんか短く表示される
+        console.log(JSON.parse(JSON.stringify(events)));
         console.log(bookmarkCount);
-        return {events,bookmarkCount}
+        return { events, bookmarkCount };
     }
     /**
-     * @param {any[]} bookmarkCount
+     * @param {string[]} bookmarkCount
      * @param {import("nostr-tools").Event[]} events
      */
     // @ts-ignore
     async function getEventwithCount(subb, bookmarkCount, events) {
-        subb.on("event", (/** @type {import("nostr-tools").Event}*/ event) => {
-            //   console.log("we got the event we wanted:", event);
+        const result = new Promise((resolve) => {
+            setTimeout(() => {
+                resolve({ bookmarkCount, events });
+            }, 3000);//とりあえずeose受け取れなくても終わるように
 
-            bookmarkCount.forEach(function (element, index) {
-                if (event.id === element) {
-                    events.push(event);
-                    bookmarkCount.splice(index, 1);
+            subb.on(
+                "event",
+                (/** @type {import("nostr-tools").Event}*/ event) => {
+                    //   console.log("we got the event we wanted:", event);
+
+                    bookmarkCount.forEach(function (element, index) {
+                        if (event.id === element) {
+                            events.push(event);
+                            bookmarkCount.splice(index, 1);
+                        }
+                    });
                 }
+            );
+
+            subb.on("eose", () => {
+                console.log(`eose:${bookmarkCount.length}`);
+                subb.unsub(); //イベントの購読を停止
+                resolve({ bookmarkCount, events });
             });
         });
-
-        subb.on("eose", () => {
-            console.log(`eose:${bookmarkCount.length}`);
-            subb.unsub(); //イベントの購読を停止
-        });
-        return { bookmarkCount, events };
+        return result;
     }
     /**
      * @param {import("nostr-tools").Relay} relay
@@ -399,17 +423,16 @@
             </p>
 
             <!-------------------------------------------------------------------->
-            {#if bookmarkContents!=null}
-                <!--<details>-->
-                    <summary>イベントIDリスト</summary>
-                    <ul class="bcmList">
-                       <!-- {#each bookmarkList.slice(1) as bookmark}-->
-                       {#each bookmarkContents as bookmark}
-                           
-                       <li>{bookmark}</li>
-                        {/each}
-                    </ul>
-                <!--</details>-->
+            {#if bookmarkContents != null}
+                <details>
+                <summary>イベントIDリスト</summary>
+                <ul class="bcmList">
+                    <!-- {#each bookmarkList.slice(1) as bookmark}-->
+                    {#each bookmarkContents as bookmark}
+                        <li>{bookmark}</li>
+                    {/each}
+                </ul>
+                </details>
 
                 <!----別のリレーへ-------------------------------------------------------->
                 <hr />
