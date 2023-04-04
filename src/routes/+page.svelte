@@ -1,7 +1,7 @@
 <script>
     //import * as fs from "fs";
 
-    import { relayInit, getEventHash, signEvent } from "nostr-tools";
+    import { relayInit, getEventHash, signEvent, nip19} from "nostr-tools";
 
     import { bech32encode } from "../lib/bech32";
 
@@ -14,6 +14,11 @@
      * @type {string | any[]}
      */
     let bookmarkList;
+    let bookmarkIDs;
+    /**
+     * @type {string[]}
+     */
+    let bookmarkContents;
     let category = "bookmark";
     let relayName = "wss://relay.nostrich.land"; //"wss://nostream.localtest.me/"; //"wss://relay.damus.io";
     let copyRelayName = ""; //"wss://nostream.localtest.me/";
@@ -30,6 +35,10 @@
     let author = "";
     let bookmark1_length = 0;
     let isView = false;
+
+    //イベント内容検索用リレーたち
+    let RelaysforSeach = ["wss://nostr.wine","wss://universe.nostrich.land/","wss://relay.damus.io"];
+
     async function clickButton() {
         //各値初期化
         isView = false; //一旦結果表示の部分非表示に
@@ -39,6 +48,8 @@
         errorMessage3 = "";
         connectMessage2 = "";
         bookmarkList = [];
+         bookmarkIDs=[];
+     bookmarkContents=[];
 
         connectMessage = "通信中";
         relayName = relayName.trim(); //空白除去
@@ -75,76 +86,94 @@
         if (bookmark1_length <= 0) return;
         const bookmarkObjs = bookmarkList.slice(1);
         const bookmarkS = bookmarkObjs.map((tag) => tag[1]);
-     //   console.log(bookmarkS);
+        //   console.log(bookmarkS);
         //const test = bookmarks[1][1];
 
         //console.log(sub);
-        const result = getEventList(relay, bookmarkS);
+        const result = await getEventList(bookmarkS);
+        const test = result.bookmarkCount[0];
+        console.log(nip19.noteEncode(test));
+        bookmarkContents=result.events.map(e=>e.content);
+        bookmarkIDs=result.events.map(e=>nip19.noteEncode(e.id)).concat(result.bookmarkCount.map(e=>nip19.noteEncode(e)));
+        
     }
 
     //----------------------------------------------clickButton
     /**
-     * @param { import("nostr-tools").Relay} relay
-     * @param {any[] } bookmarkS
+     * @param {string[] } bookmarkS
      */
-    async function getEventList(relay, bookmarkS) {
+    async function getEventList(bookmarkS) {
         /**
          * @type {string | import("nostr-tools").Filter[]}
          */
         let sub = [{ ids: [] }];
-        
+
         /**
          * @type {import("nostr-tools").Event[]}
          */
-       
+
         let events = [];
         const maxLoop = 10;
-        let imakoko=bookmarkS.length;
-        let bookmarkCount=bookmarkS;
-        for (let i = 0; i < maxLoop; i++) {
-            sub[0].ids = bookmarkCount;
-            // @ts-ignore
-            let subb = relay.sub(sub);
+        let imakoko = bookmarkS.length;
+        let bookmarkCount = bookmarkS;
+        //イベント内容取得用のリレーにつなぐ
+        //let index=0;
+        for (let j = 0 ; j <RelaysforSeach.length;j++){
+            let relay = relayInit(RelaysforSeach[j]);
+            const connect_obj = await ConnectRelay(relay);
+            if (!connect_obj.success) {
+                
+            }else{
+                
+                for (let i = 0; i < maxLoop; i++) {
+                    sub[0].ids = bookmarkCount;
+                    // @ts-ignore
+                    let subb = relay.sub(sub);
 
-            const result=await getEventwithCount(subb,bookmarkCount,events);
-           bookmarkCount=result.bookmarkCount;
-           events=result.events;
-            if (bookmarkCount.length === 0){
-                console.log("イベント全部取れたよ");
-                break;
-            }else
-            if(bookmarkCount.length===imakoko ){
-                console.log("イベント全部取れてないけどこのリレーにはもうないかも??");
-                break;
+                    const result = await getEventwithCount(subb, bookmarkCount, events);
+                    bookmarkCount = result.bookmarkCount;
+                    events = result.events;
+                    if (bookmarkCount.length === 0) {
+                        console.log("イベント全部取れたよ");
+                        break;
+                    } else if (bookmarkCount.length === imakoko) {
+                        console.log(
+                            "イベント全部取れてないけどこのリレーにはもうないかも??"
+                        );
+                        break;
+                    }
+                    imakoko = bookmarkCount.length;
+                }
             }
-            imakoko=bookmarkCount.length;
         }
-        console.log("↓イベントの中身↓")
+        console.log("↓イベントの中身↓");
         console.log(events);
+        console.log(bookmarkCount);
+        return {events,bookmarkCount}
     }
-/**
+    /**
      * @param {any[]} bookmarkCount
      * @param {import("nostr-tools").Event[]} events
      */
-// @ts-ignore
-async function getEventwithCount(subb,bookmarkCount,events){
-    subb.on("event", (/** @type {import("nostr-tools").Event}*/ event) => {
-                //   console.log("we got the event we wanted:", event);
+    // @ts-ignore
+    async function getEventwithCount(subb, bookmarkCount, events) {
+        subb.on("event", (/** @type {import("nostr-tools").Event}*/ event) => {
+            //   console.log("we got the event we wanted:", event);
 
-                bookmarkCount.forEach(function (element, index) {
-                    if (event.id === element) {
-                        events.push(event);
-                        bookmarkCount.splice(index,1);
-                    }
-                });
+            bookmarkCount.forEach(function (element, index) {
+                if (event.id === element) {
+                    events.push(event);
+                    bookmarkCount.splice(index, 1);
+                }
             });
+        });
 
-            subb.on("eose", () => {
-                console.log(`eose:${bookmarkCount.length}`);
-                 subb.unsub();//イベントの購読を停止
-            });
-            return {bookmarkCount,events}
-}
+        subb.on("eose", () => {
+            console.log(`eose:${bookmarkCount.length}`);
+            subb.unsub(); //イベントの購読を停止
+        });
+        return { bookmarkCount, events };
+    }
     /**
      * @param {import("nostr-tools").Relay} relay
      */
@@ -277,7 +306,7 @@ async function getEventwithCount(subb,bookmarkCount,events){
     }
 
     //-拡張機能からpubkey取得
-    async function clickGetPubkeyButton(){
+    async function clickGetPubkeyButton() {
         isView = false; //一旦結果表示の部分非表示に
         bookmark1_length = 0;
         errorMessage = "";
@@ -287,14 +316,12 @@ async function getEventwithCount(subb,bookmarkCount,events){
         connectMessage2 = "";
         bookmarkList = [];
         try {
-        // @ts-ignore
-        pubkey = await window.nostr.getPublicKey();
-        
-    } catch (error) {
-         errorMessage="拡張機能読み込めなかったかも"   
+            // @ts-ignore
+            pubkey = await window.nostr.getPublicKey();
+        } catch (error) {
+            errorMessage = "拡張機能読み込めなかったかも";
         }
     }
-
 </script>
 
 <!-------------------------------------------------------------------->
@@ -328,7 +355,9 @@ async function getEventwithCount(subb,bookmarkCount,events){
             style="min-width:600px"
         />
         <!--拡張機能からpubkey取得-->
-        <button on:click={clickGetPubkeyButton} style="display:inline"> 拡張機能からpubkey取得</button>
+        <button on:click={clickGetPubkeyButton} style="display:inline">
+            拡張機能からpubkey取得</button
+        >
         <!----------------------------->
         relay:
         <input
@@ -370,12 +399,14 @@ async function getEventwithCount(subb,bookmarkCount,events){
             </p>
 
             <!-------------------------------------------------------------------->
-            {#if bookmark1_length > 0}
+            {#if bookmarkContents!=null}
                 <details>
                     <summary>イベントIDリスト</summary>
                     <ul class="bcmList">
-                        {#each bookmarkList.slice(1) as bookmark}
-                            <li>{bookmark[1]}</li>
+                       <!-- {#each bookmarkList.slice(1) as bookmark}-->
+                       {#each bookmarkContents as bookmark}
+                           
+                       <li>{bookmark}</li>
                         {/each}
                     </ul>
                 </details>
