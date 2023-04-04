@@ -395,12 +395,12 @@
     {#if isView}
         <div id="bookmarkList">
             <p>
-                ブックマーク件数:{bookmark1_length}
+                ブックマーク件数:{bookmark1_length}、イベント取れた{bookmarkContents.length}
             </p>
 
             <!-------------------------------------------------------------------->
             {#if bookmarkContents!=null}
-                <details>
+                <!--<details>-->
                     <summary>イベントIDリスト</summary>
                     <ul class="bcmList">
                        <!-- {#each bookmarkList.slice(1) as bookmark}-->
@@ -409,7 +409,7 @@
                        <li>{bookmark}</li>
                         {/each}
                     </ul>
-                </details>
+                <!--</details>-->
 
                 <!----別のリレーへ-------------------------------------------------------->
                 <hr />
