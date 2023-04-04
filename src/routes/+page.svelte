@@ -419,7 +419,7 @@
     {#if isView}
         <div id="bookmarkList">
             <p>
-                ブックマーク件数:{bookmark1_length}、イベント取れた{bookmarkContents.length}
+                ブックマーク件数:{bookmark1_length}、{#if bookmarkContents.length==0}通信中{/if}{#if bookmarkContents.length>0}イベント取れた{bookmarkContents.length}{/if}
             </p>
 
             <!-------------------------------------------------------------------->
@@ -429,7 +429,7 @@
                 <ul class="bcmList">
                     <!-- {#each bookmarkList.slice(1) as bookmark}-->
                     {#each bookmarkContents as bookmark}
-                        <li>{bookmark}</li>
+                        <li class="bookmarkContents">{bookmark}</li>
                     {/each}
                 </ul>
                 </details>
@@ -520,5 +520,12 @@
     a:visited,
     a:link {
         color: gray;
+    }
+    .bookmarkContents{
+        border:solid 1px lightgrey;
+        margin: 10px;
+        padding: 10px;
+        word-wrap:border-word; 
+        word-break:break-all;   
     }
 </style>
