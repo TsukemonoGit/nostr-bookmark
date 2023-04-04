@@ -275,6 +275,25 @@ async function getEventwithCount(subb,bookmarkCount,events){
 
         return { isSuccess, author, connectMessage };
     }
+
+    //-拡張機能からpubkey取得
+    async function clickGetPubkeyButton(){
+        isView = false; //一旦結果表示の部分非表示に
+        bookmark1_length = 0;
+        errorMessage = "";
+        errorMessage2 = "";
+        errorMessage3 = "";
+        connectMessage = "";
+        connectMessage2 = "";
+        bookmarkList = [];
+        try {
+        pubkey = await window.nostr.getPublicKey();
+        
+    } catch (error) {
+         errorMessage="拡張機能読み込めなかったかも"   
+        }
+    }
+
 </script>
 
 <!-------------------------------------------------------------------->
@@ -307,7 +326,9 @@ async function getEventwithCount(subb,bookmarkCount,events){
             placeholder="npub or hex"
             style="min-width:600px"
         />
-
+        <!--拡張機能からpubkey取得-->
+        <button on:click={clickGetPubkeyButton} style="display:inline"> 拡張機能からpubkey取得</button>
+        <!----------------------------->
         relay:
         <input
             type="text"
