@@ -440,7 +440,7 @@
                     <!-- {#each bookmarkList.slice(1) as bookmark}-->
                     {#each bookmarkEvents as bookmark}
                     <li class="bookmarkBox">
-                        <div class="noteID">{nip19.noteEncode(bookmark.id)}</div>
+                        <a href=https://nostx.shino3.net/{nip19.noteEncode(bookmark.id)}  class="noteID">{nip19.noteEncode(bookmark.id)}</a>
                         <div class="content">{bookmark.content}</div>
 
                     </li>
