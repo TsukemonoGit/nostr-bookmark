@@ -58,6 +58,7 @@
         bookmarkList = [];
         bookmarkIDs = [];
         bookmarkContents = [];
+        bookmarkEvents=[];
 
         connectMessage = "通信中";
         relayName = relayName.trim(); //空白除去
@@ -432,7 +433,7 @@
     {#if isView}
         <div id="bookmarkList">
             <p>
-                ブックマーク件数:{bookmark1_length}、{#if bookmarkContents.length==0}通信中{/if}{#if bookmarkContents.length>0}イベント取れた{bookmarkContents.length}{/if}
+                ブックマーク件数:{bookmark1_length}、{#if bookmark1_length!=0&&bookmarkContents.length==0}通信中{/if}{#if bookmarkContents.length>0}イベント取れた{bookmarkContents.length}{/if}
             </p>
 
             <!------------------------------ブックマークの内容表示のとこ------------------------>
