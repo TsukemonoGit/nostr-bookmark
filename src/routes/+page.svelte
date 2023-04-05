@@ -16,6 +16,10 @@
     let bookmarkList;
     let bookmarkIDs;
     /**
+     * @type {any[]}
+     */
+    let bookmarkEvents=[];
+    /**
      * @type {string[]}
      */
     let bookmarkContents;
@@ -94,14 +98,15 @@
         //const test = bookmarks[1][1];
 
         //console.log(sub);
-        const result = await getEventList(bookmarkS);
+        const result= await getEventList(bookmarkS);
         console.log(`リザルトのとのイベントのながさ${result.events.length}`);
-        bookmarkContents = result.events.map((e) => e.content);
+        bookmarkEvents=JSON.parse(JSON.stringify(result.events));
+        bookmarkContents = result.events.map(( /** @type {{ content: string; }} */ e) => e.content);
         console.log(
             `ぶっくまーくこんてんとのながあさ${bookmarkContents.length}`
         );
         bookmarkIDs = result.events
-            .map((e) => nip19.noteEncode(e.id))
+            .map((/** @type {{ id: string; }} */ e) => nip19.noteEncode(e.id))
             .concat(result.bookmarkCount.map((e) => nip19.noteEncode(e)));
     }
 
@@ -116,7 +121,7 @@
         let sub = [{ ids: [] }];
 
         /**
-         * @type {import("nostr-tools").Event[]}
+         * 
          */
 
         let events = [];
@@ -162,8 +167,11 @@
         console.log(events); //←ここにはちゃんと全部入ってるように見える
         console.log(`リターンする前のイベントの長さ${events.length}`); //これはなんか短く表示される
         console.log(JSON.parse(JSON.stringify(events)));
+       // events=JSON.parse(JSON.stringify(events));
+       // bookmarkCount = JSON.parse(JSON.stringify(events));
         console.log(bookmarkCount);
-        return { events, bookmarkCount };
+      //  return { events, bookmarkCount };
+    return {events,bookmarkCount}
     }
     /**
      * @param {string[]} bookmarkCount
@@ -424,14 +432,18 @@
                 ブックマーク件数:{bookmark1_length}、{#if bookmarkContents.length==0}通信中{/if}{#if bookmarkContents.length>0}イベント取れた{bookmarkContents.length}{/if}
             </p>
 
-            <!-------------------------------------------------------------------->
+            <!------------------------------ブックマークの内容表示のとこ------------------------>
             {#if bookmarkContents != null}
                 <details>
                 <summary>イベントIDリスト</summary>
                 <ul class="bcmList">
                     <!-- {#each bookmarkList.slice(1) as bookmark}-->
-                    {#each bookmarkContents as bookmark}
-                        <li class="bookmarkContents">{bookmark}</li>
+                    {#each bookmarkEvents as bookmark}
+                    <li class="bookmarkBox">
+                        <div class="noteID">{nip19.noteEncode(bookmark.id)}</div>
+                        <div class="content">{bookmark.content}</div>
+
+                    </li>
                     {/each}
                 </ul>
                 </details>
@@ -487,12 +499,11 @@
 
     button {
         font-size: medium;
-        display: block;
-        padding: 10px;
-        margin: 20px 5px 20px 5px;
-        border: solid 1px lightgray;
-        cursor: pointer;
+        padding: 5px ;
+        margin: 5px;
+
     }
+
     .content {
         margin-top: 10px;
         margin-left: 10px;
@@ -523,11 +534,13 @@
     a:link {
         color: gray;
     }
-    .bookmarkContents{
+    .bookmarkBox{
         border:solid 1px lightgrey;
         margin: 10px;
         padding: 10px;
-        word-wrap:border-word; 
-        word-break:break-all;   
+        word-wrap:break-word; 
+        word-break:break-all;  
+        display: block; 
     }
+  
 </style>
