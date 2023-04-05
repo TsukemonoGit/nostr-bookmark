@@ -27,12 +27,12 @@
      */
     let bookmarkContents;
     let category = "bookmark";
-    let relayName = "wss://relay.nostrich.land"; //"wss://nostream.localtest.me/"; //"wss://relay.damus.io";
+    let relayName = "";//"wss://relay.nostrich.land"; //"wss://nostream.localtest.me/"; //"wss://relay.damus.io";
     let copyRelayName = ""; //"wss://nostream.localtest.me/";
     let connectMessage = "";
     let connectMessage2 = "";
-    let pubkey =
-        "npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw";
+    let pubkey ="";
+        //"npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw";
     let errorMessage = "";
     let errorMessage2 = "";
     let errorMessage3 = "";
