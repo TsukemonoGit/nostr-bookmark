@@ -14,6 +14,9 @@
      * @type {string | any[]}
      */
     let bookmarkList;
+    /**
+     * @type {string[]}
+     */
     let bookmarkIDs;
     /**
      * @type {any[]}
@@ -106,9 +109,10 @@
         console.log(
             `ぶっくまーくこんてんとのながあさ${bookmarkContents.length}`
         );
-        bookmarkIDs = result.events
-            .map((/** @type {{ id: string; }} */ e) => nip19.noteEncode(e.id))
-            .concat(result.bookmarkCount.map((e) => nip19.noteEncode(e)));
+      //  bookmarkIDs = result.events
+       //     .map((/** @type {{ id: string; }} */ e) => nip19.noteEncode(e.id))
+       //     .concat(result.bookmarkCount.map((e) => nip19.noteEncode(e)));
+            bookmarkIDs = result.bookmarkCount.map((e) => nip19.noteEncode(e));
     }
 
     //----------------------------------------------clickButton
@@ -390,7 +394,7 @@
             type="text"
             bind:value={pubkey}
             placeholder="npub or hex"
-            style="min-width:600px"
+            style="width:600px"
         />
         <!--拡張機能からpubkey取得-->
         <button on:click={clickGetPubkeyButton} style="display:inline">
@@ -402,7 +406,7 @@
             type="text"
             bind:value={relayName}
             placeholder="wss://..."
-            style="min-width:350px"
+            style="width:350px"
         />
 
         取得するブックマークのカテゴリ名（デフォルトはbookmark)
@@ -411,7 +415,7 @@
             type="text"
             bind:value={category}
             placeholder="bookmark"
-            style="min-width:350px"
+            style="width:350px"
         />
         <button on:click={clickButton}> BookmarkListを取得</button>
     </div>
@@ -445,7 +449,13 @@
                     {#each bookmarkEvents as bookmark}
                     <li class="bookmarkBox">
                         <a href=https://nostx.shino3.net/{nip19.noteEncode(bookmark.id)}  class="noteID">{nip19.noteEncode(bookmark.id)}</a>
+                        <div class="date"> [{new Date(bookmark.created_at*1000).toLocaleString()}]</div>
                         <div class="content">{bookmark.content}</div>
+                        {/each}
+                    
+                    {#each bookmarkIDs as bookmark}
+                    <li class="bookmarkBox">
+                        <a href=https://nostx.shino3.net/{bookmark}  class="noteID">{bookmark}</a>
 
                     </li>
                     {/each}
@@ -544,7 +554,20 @@
         padding: 10px;
         word-wrap:break-word; 
         word-break:break-all;  
-        display: block; 
+      }
+      .bookmarkBox a:hover {
+        color: rgb(149, 204, 226);
+    }
+    .bookmarkBox a{
+        color: rgb(72, 137, 163);
+    }
+      
+    .date{        
+        margin-left: 10px;
+        display:inline;
+        font-size: smaller;
+        color: rgb(68, 68, 68);
+       
     }
   
 </style>
