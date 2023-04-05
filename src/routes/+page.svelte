@@ -21,18 +21,18 @@
     /**
      * @type {any[]}
      */
-    let bookmarkEvents=[];
+    let bookmarkEvents = [];
     /**
      * @type {string[]}
      */
     let bookmarkContents;
     let category = "bookmark";
-    let relayName = "";//"wss://relay.nostrich.land"; //"wss://nostream.localtest.me/"; //"wss://relay.damus.io";
+    let relayName = ""; //"wss://relay.nostrich.land"; //"wss://nostream.localtest.me/"; //"wss://relay.damus.io";
     let copyRelayName = ""; //"wss://nostream.localtest.me/";
     let connectMessage = "";
     let connectMessage2 = "";
-    let pubkey ="";
-        //"npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw";
+    let pubkey = "";
+    //"npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw";
     let errorMessage = "";
     let errorMessage2 = "";
     let errorMessage3 = "";
@@ -61,7 +61,7 @@
         bookmarkList = [];
         bookmarkIDs = [];
         bookmarkContents = [];
-        bookmarkEvents=[];
+        bookmarkEvents = [];
 
         connectMessage = "通信中";
         relayName = relayName.trim(); //空白除去
@@ -102,17 +102,19 @@
         //const test = bookmarks[1][1];
 
         //console.log(sub);
-        const result= await getEventList(bookmarkS);
+        const result = await getEventList(bookmarkS);
         console.log(`リザルトのとのイベントのながさ${result.events.length}`);
-        bookmarkEvents=JSON.parse(JSON.stringify(result.events));
-        bookmarkContents = result.events.map(( /** @type {{ content: string; }} */ e) => e.content);
+        bookmarkEvents = JSON.parse(JSON.stringify(result.events));
+        bookmarkContents = result.events.map(
+            (/** @type {{ content: string; }} */ e) => e.content
+        );
         console.log(
             `ぶっくまーくこんてんとのながあさ${bookmarkContents.length}`
         );
-      //  bookmarkIDs = result.events
-       //     .map((/** @type {{ id: string; }} */ e) => nip19.noteEncode(e.id))
-       //     .concat(result.bookmarkCount.map((e) => nip19.noteEncode(e)));
-            bookmarkIDs = result.bookmarkCount.map((e) => nip19.noteEncode(e));
+        //  bookmarkIDs = result.events
+        //     .map((/** @type {{ id: string; }} */ e) => nip19.noteEncode(e.id))
+        //     .concat(result.bookmarkCount.map((e) => nip19.noteEncode(e)));
+        bookmarkIDs = result.bookmarkCount.map((e) => nip19.noteEncode(e));
     }
 
     //----------------------------------------------clickButton
@@ -126,7 +128,7 @@
         let sub = [{ ids: [] }];
 
         /**
-         * 
+         *
          */
 
         let events = [];
@@ -172,23 +174,23 @@
         console.log(events); //←ここにはちゃんと全部入ってるように見える
         console.log(`リターンする前のイベントの長さ${events.length}`); //これはなんか短く表示される
         console.log(JSON.parse(JSON.stringify(events)));
-       // events=JSON.parse(JSON.stringify(events));
-       // bookmarkCount = JSON.parse(JSON.stringify(events));
+        // events=JSON.parse(JSON.stringify(events));
+        // bookmarkCount = JSON.parse(JSON.stringify(events));
         console.log(bookmarkCount);
-      //  return { events, bookmarkCount };
-    return {events,bookmarkCount}
+        //  return { events, bookmarkCount };
+        return { events, bookmarkCount };
     }
     /**
      * @param {string[]} bookmarkCount
      * @param {import("nostr-tools").Event[]} events
      */
     // @ts-ignore
-    async function getEventwithCount(subb, bookmarkCount, events) {         
+    async function getEventwithCount(subb, bookmarkCount, events) {
         const result = new Promise((resolve) => {
             //setTimeoutの戻り値を保持する
-          const  timeoutID=setTimeout(() => {
+            const timeoutID = setTimeout(() => {
                 resolve({ bookmarkCount, events });
-            }, 3000);//とりあえずeose受け取れなくても終わるように
+            }, 3000); //とりあえずeose受け取れなくても終わるように
 
             subb.on(
                 "event",
@@ -207,7 +209,7 @@
             subb.on("eose", () => {
                 console.log(`eose:${bookmarkCount.length}`);
                 subb.unsub(); //イベントの購読を停止
-                clearTimeout(timeoutID);//settimeoutのタイマーより早くeoseを受け取ったら、setTimeoutをキャンセルさせる。
+                clearTimeout(timeoutID); //settimeoutのタイマーより早くeoseを受け取ったら、setTimeoutをキャンセルさせる。
                 resolve({ bookmarkCount, events });
             });
         });
@@ -251,27 +253,44 @@
         let bool = false;
         let message = "";
         try {
-            relay.on("connect", () => {
-                bool = true;
-                message = `connected to ${relay.url}`;
-                console.log(message);
-            });
-            relay.on("error", () => {
-                bool = false;
-                message = `failed to connect to ${relay.url}`;
-                console.log(message);
-            });
-
             await relay.connect();
         } catch (error) {
             bool = false;
             message = `リレーが見つかりません。アドレスを確認してください`;
             console.log(message);
         }
-        return {
-            success: bool,
-            message: message,
-        };
+
+        const result = new Promise((resolve) => {
+            //setTimeoutの戻り値を保持する
+            const timeoutID = setTimeout(() => {
+                resolve({
+                    success: bool,
+                    message: message,
+                });
+            }, 10000); //とりあえずeose受け取れなくても終わるように(結構時間かかるときはかかるっぽいのでとりあえず10秒)
+
+            relay.on("connect", () => {
+                bool = true;
+                message = `connected to ${relay.url}`;
+                console.log(message);
+                resolve({
+                    success: bool,
+                    message: message,
+                });
+            });
+            relay.on("error", () => {
+                bool = false;
+                message = `failed to connect to ${relay.url}`;
+                console.log(message);
+                clearTimeout(timeoutID); //settimeoutのタイマーより早くeoseを受け取ったら、setTimeoutをキャンセルさせる。
+                resolve({
+                    success: bool,
+                    message: message,
+                });
+            });
+        });
+
+        return result;
     }
 
     //------------------------------------------------
@@ -297,11 +316,11 @@
             try {
                 // @ts-ignore
                 const event = await window.nostr.signEvent({
+                    content: bookmarkListObj.content,
                     kind: 30001,
                     pubkey: author,
                     created_at: Math.floor(Date.now() / 1000),
                     tags: bookmarkListObj.tags,
-                    content: bookmarkListObj.content,
                 });
 
                 event.id = getEventHash(event);
@@ -382,6 +401,7 @@
             <li>
                 たまに普段使わないリレーに送信しておいたりしたらいいかもしれません
             </li>
+            <li>リレー接続Max10秒待ち</li>
             <li>
                 noteIDおしたらNosTx（https://nostx.shino3.net/）が開かれるかも
             </li>
@@ -437,29 +457,47 @@
     {#if isView}
         <div id="bookmarkList">
             <p>
-                ブックマーク件数:{bookmark1_length}、{#if bookmark1_length!=0&&bookmarkContents.length==0}通信中{/if}{#if bookmarkContents.length>0}イベント取れた{bookmarkContents.length}{/if}
+                ブックマーク件数:{bookmark1_length}、{#if bookmark1_length != 0 && bookmarkContents.length == 0}通信中{/if}{#if bookmarkContents.length > 0}イベント取れた{bookmarkContents.length}{/if}
             </p>
 
             <!------------------------------ブックマークの内容表示のとこ------------------------>
             {#if bookmarkContents != null}
                 <details>
-                <summary>イベントIDリスト</summary>
-                <ul class="bcmList">
-                    <!-- {#each bookmarkList.slice(1) as bookmark}-->
-                    {#each bookmarkEvents as bookmark}
-                    <li class="bookmarkBox">
-                        <a href=https://nostx.shino3.net/{nip19.noteEncode(bookmark.id)}  class="noteID">{nip19.noteEncode(bookmark.id)}</a>
-                        <div class="date"> [{new Date(bookmark.created_at*1000).toLocaleString()}]</div>
-                        <div class="content">{bookmark.content}</div>
-                        {/each}
-                    
-                    {#each bookmarkIDs as bookmark}
-                    <li class="bookmarkBox">
-                        <a href=https://nostx.shino3.net/{bookmark}  class="noteID">{bookmark}</a>
+                    <summary>イベントIDリスト</summary>
+                    <ul class="bcmList">
+                        <!-- {#each bookmarkList.slice(1) as bookmark}-->
+                        {#each bookmarkEvents as bookmark}
+                            <li class="bookmarkBox">
+                                <a
+                                    href="https://nostx.shino3.net/{nip19.noteEncode(
+                                        bookmark.id
+                                    )}"
+                                    class="noteID"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    >{nip19.noteEncode(bookmark.id)}</a
+                                >
+                                <div class="date">
+                                    [{new Date(
+                                        bookmark.created_at * 1000
+                                    ).toLocaleString()}]
+                                </div>
+                                <div class="bookmarkcontent">
+                                    {bookmark.content}
+                                </div>
+                            </li>{/each}
 
-                    </li>
-                    {/each}
-                </ul>
+                        {#each bookmarkIDs as bookmark}
+                            <li class="bookmarkBox">
+                                <a
+                                    href="https://nostx.shino3.net/{bookmark}"
+                                    class="noteID"
+                                    target="_blank"
+                                    rel="noopener noreferrer">{bookmark}</a
+                                >
+                            </li>
+                        {/each}
+                    </ul>
                 </details>
 
                 <!----別のリレーへ-------------------------------------------------------->
@@ -472,10 +510,9 @@
                         placeholder="wss://..."
                         style="min-width:250px"
                     />
+
+                    <button on:click={clickCopyButton}> 保存</button>
                 </div>
-                <button on:click={clickCopyButton}>
-                    {copyRelayName}に上書き保存</button
-                >
                 {#if connectMessage2.length == 0}
                     <div style="margin:50px" />
                 {/if}
@@ -491,13 +528,16 @@
     {/if}
     <hr />
     <div id="footer">
-        Github: <a href="https://github.com/TsukemonoGit/nostr-bookmark"
-            >TsukemonoGit/nostr-bookmark</a
+        Github: <a
+            href="https://github.com/TsukemonoGit/nostr-bookmark"
+            target="_blank"
+            rel="noopener noreferrer">TsukemonoGit/nostr-bookmark</a
         > <br />
         Author:
         <a
             href="https://nostx.shino3.net/npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw"
-            >mono(Nostr)</a
+            target="_blank"
+            rel="noopener noreferrer">mono(Nostr)</a
         >
     </div>
 </main>
@@ -513,9 +553,8 @@
 
     button {
         font-size: medium;
-        padding: 5px ;
+        padding: 5px 10px 5px 10px;
         margin: 5px;
-
     }
 
     .content {
@@ -527,6 +566,7 @@
         font-size: medium;
         padding: 10px 10px 5px 10px;
         margin: 5px;
+        max-width: 85vw;
     }
     .bcmList {
         list-style: decimal-leading-zero;
@@ -541,33 +581,35 @@
         color: rgb(70, 70, 70);
     }
     #footer a:hover {
-        color: rgb(255, 155, 155);
+        color: rgb(73, 73, 73);
     }
     #footer a:active,
     a:visited,
     a:link {
         color: gray;
     }
-    .bookmarkBox{
-        border:solid 1px lightgrey;
+    .bookmarkBox {
+        border: solid 1px lightgrey;
         margin: 10px;
         padding: 10px;
-        word-wrap:break-word; 
-        word-break:break-all;  
-      }
-      .bookmarkBox a:hover {
-        color: rgb(149, 204, 226);
+        word-wrap: break-word;
+        word-break: break-all;
     }
-    .bookmarkBox a{
+    .bookmarkBox a:hover {
+        color: rgb(134, 192, 214);
+    }
+    .bookmarkBox a {
         color: rgb(72, 137, 163);
     }
-      
-    .date{        
+
+    .date {
         margin-left: 10px;
-        display:inline;
+        display: inline-block;
         font-size: smaller;
         color: rgb(68, 68, 68);
-       
     }
-  
+    .bookmarkcontent {
+        margin-top: 10px;
+        margin-left: 10px;
+    }
 </style>
