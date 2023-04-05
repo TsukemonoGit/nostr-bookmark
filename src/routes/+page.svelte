@@ -170,9 +170,10 @@
      * @param {import("nostr-tools").Event[]} events
      */
     // @ts-ignore
-    async function getEventwithCount(subb, bookmarkCount, events) {
+    async function getEventwithCount(subb, bookmarkCount, events) {         
         const result = new Promise((resolve) => {
-            setTimeout(() => {
+            //setTimeoutの戻り値を保持する
+          const  timeoutID=setTimeout(() => {
                 resolve({ bookmarkCount, events });
             }, 3000);//とりあえずeose受け取れなくても終わるように
 
@@ -193,6 +194,7 @@
             subb.on("eose", () => {
                 console.log(`eose:${bookmarkCount.length}`);
                 subb.unsub(); //イベントの購読を停止
+                clearTimeout(timeoutID);//settimeoutのタイマーより早くeoseを受け取ったら、setTimeoutをキャンセルさせる。
                 resolve({ bookmarkCount, events });
             });
         });
