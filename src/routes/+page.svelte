@@ -49,8 +49,10 @@
         "wss://universe.nostrich.land/",
         "wss://relay.damus.io",
     ];
-
+    //ブックマークを取得ボタン
     async function clickButton() {
+        //Naddrキーを作る
+        CreateNaddr();
         //各値初期化
         isView = false; //一旦結果表示の部分非表示に
         bookmark1_length = 0;
@@ -118,6 +120,20 @@
     }
 
     //----------------------------------------------clickButton
+    function CreateNaddr(){
+         /**
+     * @type {import("nostr-tools/lib/nip19").AddressPointer }
+     */
+        const address=   {
+            identifier: category,
+            pubkey: pubkey,
+            kind: 30001
+        }
+        const naddr = nip19.naddrEncode(address)
+        console.log(naddr)
+        console.log("↓naddrデコード↓")
+        console.log(nip19.decode(naddr));
+    }
     /**
      * @param {string[] } bookmarkS
      */
