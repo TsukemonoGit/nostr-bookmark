@@ -1,9 +1,12 @@
 <script>
+    // @ts-nocheck
+
     //import * as fs from "fs";
 
     import { relayInit, getEventHash, signEvent, nip19 } from "nostr-tools";
 
     import { bech32encode } from "../lib/bech32";
+    import { onMount, setContext } from "svelte";
 
     /**
      * @type {import("nostr-tools").Event}
@@ -49,6 +52,29 @@
         "wss://universe.nostrich.land/",
         "wss://relay.damus.io",
     ];
+    /**
+     * @type {{ [x: string]: string; identifier?: any; pubkey?: any; relays?: any; type?: string; data?: string | nip19.AddressPointer | nip19.ProfilePointer | nip19.EventPointer; }}
+     */
+
+    //コンポーネントが最初に DOM にレンダリングされた後に実行されます(?)
+    onMount(async () => {
+        //URLのパラメータがあったらやんややんや
+        const url = new URL(window.location.href);
+        const naddrParam = url.searchParams.get("naddr");
+        if (naddrParam != null) {
+            const naddr = nip19.decode(naddrParam);
+            console.log(naddr);
+            category = naddr.data.identifier;
+            pubkey = naddr.data.pubkey;
+            relayName = naddr.data.relays[0];
+            console.log(naddr.data.identifier);
+            clickButton();
+        
+        }
+    });
+
+
+
     //ブックマークを取得ボタン
     async function clickButton() {
         //Naddrキーを作る
@@ -120,19 +146,21 @@
     }
 
     //----------------------------------------------clickButton
-    function CreateNaddr(){
-         /**
-     * @type {import("nostr-tools/lib/nip19").AddressPointer }
-     */
-        const address=   {
+    function CreateNaddr() {
+        /**
+         * @type {import("nostr-tools/lib/nip19").AddressPointer }
+         */
+        const address = {
             identifier: category,
             pubkey: pubkey,
-            kind: 30001
-        }
-        const naddr = nip19.naddrEncode(address)
-        console.log(naddr)
-        console.log("↓naddrデコード↓")
+            kind: 30001,
+            relays: [relayName],
+        };
+        const naddr = nip19.naddrEncode(address);
+        console.log(naddr);
+        console.log("↓naddrデコード↓");
         console.log(nip19.decode(naddr));
+        console.log(nip19.decode(naddr).data.identifier);
     }
     /**
      * @param {string[] } bookmarkS
