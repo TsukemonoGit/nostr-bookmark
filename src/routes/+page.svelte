@@ -77,6 +77,7 @@
 
     //ブックマークを取得ボタン
     async function clickButton() {
+        shareURL="";
       //  //Naddrキーを作る
       //  CreateNaddr();
         //各値初期化
@@ -154,7 +155,7 @@
          */
         const address = {
             identifier: category,
-            pubkey: pubkey,
+            pubkey: author,
             kind: 30001,
             relays: [relayName],
         };
