@@ -143,6 +143,7 @@
         //     .map((/** @type {{ id: string; }} */ e) => nip19.noteEncode(e.id))
         //     .concat(result.bookmarkCount.map((e) => nip19.noteEncode(e)));
         bookmarkIDs = result.bookmarkCount.map((e) => nip19.noteEncode(e));
+       CreateNaddr();
         cleateURL();
     }
 
