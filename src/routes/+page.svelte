@@ -39,7 +39,7 @@
     let errorMessage = "";
     let errorMessage2 = "";
     let errorMessage3 = "";
-
+    let shareURL;
     // "npub12egp0pvh2f0fp6sk5nt6ncehqzkz8zsma8dl8agf8p3f98v6resqku4w26";
     //"npub1sjcvg64knxkrt6ev52rywzu9uzqakgy8ehhk8yezxmpewsthst6sw3jqcw";
     let author = "";
@@ -77,8 +77,8 @@
 
     //ブックマークを取得ボタン
     async function clickButton() {
-        //Naddrキーを作る
-        CreateNaddr();
+      //  //Naddrキーを作る
+      //  CreateNaddr();
         //各値初期化
         isView = false; //一旦結果表示の部分非表示に
         bookmark1_length = 0;
@@ -143,6 +143,7 @@
         //     .map((/** @type {{ id: string; }} */ e) => nip19.noteEncode(e.id))
         //     .concat(result.bookmarkCount.map((e) => nip19.noteEncode(e)));
         bookmarkIDs = result.bookmarkCount.map((e) => nip19.noteEncode(e));
+        cleateURL();
     }
 
     //----------------------------------------------clickButton
@@ -156,12 +157,23 @@
             kind: 30001,
             relays: [relayName],
         };
-        const naddr = nip19.naddrEncode(address);
-        console.log(naddr);
-        console.log("↓naddrデコード↓");
-        console.log(nip19.decode(naddr));
-        console.log(nip19.decode(naddr).data.identifier);
+       return nip19.naddrEncode(address);
+        // console.log(naddr);
+        // console.log("↓naddrデコード↓");
+        // console.log(nip19.decode(naddr));
+        // console.log(nip19.decode(naddr).data.identifier);
     }
+    function clickShareButton(){
+        navigator.clipboard.writeText(shareURL);
+alert("クリップボードにコピーしました");
+    }
+    function cleateURL(){
+       const naddr = CreateNaddr();
+        const url = new URL(window.location.href);
+        url.searchParams.set('naddr', naddr);
+        shareURL=url;
+    }
+
     /**
      * @param {string[] } bookmarkS
      */
@@ -543,7 +555,16 @@
                         {/each}
                     </ul>
                 </details>
-
+                <hr />
+                <div class ="share">
+                    共有用URL<br>
+                    <input
+            type="text"
+            bind:value={shareURL}
+            style="width:80%"
+        />
+                    <button on:click={clickShareButton} style="display:inline"> URLをコピー</button>
+                </div>
                 <!----別のリレーへ-------------------------------------------------------->
                 <hr />
                 <div class="content">
@@ -656,4 +677,7 @@
         margin-top: 10px;
         margin-left: 10px;
     }
+.share{
+  width:100%  
+}
 </style>
