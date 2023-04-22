@@ -52,7 +52,7 @@
     //イベント内容検索用リレーたち
     let RelaysforSeach = [
         "wss://nostr.wine",
-        "wss://universe.nostrich.land/",
+        "wss://universe.nostrich.land",
         "wss://relay.damus.io",
     ];
     /**
@@ -251,7 +251,7 @@ alert("クリップボードにコピーしました");
             //setTimeoutの戻り値を保持する
             const timeoutID = setTimeout(() => {
                 resolve({ bookmarkCount, events });
-            }, 3000); //とりあえずeose受け取れなくても終わるように
+            }, 5000); //とりあえずeose受け取れなくても終わるように
 
             subb.on(
                 "event",
@@ -328,7 +328,7 @@ alert("クリップボードにコピーしました");
                     success: bool,
                     message: message,
                 });
-            }, 10000); //とりあえずeose受け取れなくても終わるように(結構時間かかるときはかかるっぽいのでとりあえず10秒)
+            }, 5000); //とりあえずeose受け取れなくても終わるように(結構時間かかるときはかかるっぽいのでとりあえず10秒)
 
             relay.on("connect", () => {
                 bool = true;
@@ -482,7 +482,7 @@ alert("クリップボードにコピーしました");
             <li>
                 たまに普段使わないリレーに送信しておいたりしたらいいかもしれません
             </li>
-            <li>リレー接続Max10秒待ち</li>
+            <li>リレー接続Max5秒待ち</li>
             <li>
                 noteIDおしたらNosTx（https://nostx.shino3.net/）が開かれるかも
             </li>
