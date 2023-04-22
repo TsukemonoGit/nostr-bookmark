@@ -470,7 +470,8 @@ alert("クリップボードにコピーしました");
             <strong style="color:red"
                 >開発途中です！ブクマ消失する可能性有り取り扱い注意！！</strong
             ><br />
-            kind:30001に保存されている公開ブックマークをリレーからリレーに移植
+            kind:30001に保存されているブックマークをリレーからリレーに移植 
+            <a href="https://github.com/nostr-protocol/nips/blob/master/51.md">[NIP-51]</a>
         </p>
         <ul>
             <li>
