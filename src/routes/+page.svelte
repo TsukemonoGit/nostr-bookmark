@@ -45,6 +45,9 @@
     let author = "";
     let bookmark1_length = 0;
     let isView = false;
+    let relays=[];//nos2xにリレーリストがあったらそこからドロップダウンリスト作る
+    let isListView=false;
+    let seletRelayName;
 
     //イベント内容検索用リレーたち
     let RelaysforSeach = [
@@ -431,13 +434,32 @@ alert("クリップボードにコピーしました");
         connectMessage = "";
         connectMessage2 = "";
         bookmarkList = [];
+        relays=[];
         try {
             // @ts-ignore
             pubkey = await window.nostr.getPublicKey();
+            const preRelays = await window.nostr.getRelays(); // returns a map of relays
+            console.log(Object.keys(preRelays).length);
+            if(Object.keys(preRelays).length >= 1 ){
+                relayName=Object.keys(preRelays)[0];
+                relays=Object.keys(preRelays);
+            // } if(Object.keys(preRelays).length>1){
+            //     for (let i = 0; i < Object.keys(preRelays).length; i++) {
+            //         relays.push({ id: i + 1, text: Object.keys(preRelays)[i] });
+            //     }
+             }
+            //relays=Object.keys(relays);
+            console.log(relays);
+            console.log(relays.length);
         } catch (error) {
             errorMessage = "拡張機能読み込めなかったかも";
         }
     }
+
+    // function clickLisListView(){
+    //     if(isListView){isListView=false}else{isListView=true}
+    // }
+
 </script>
 
 <!-------------------------------------------------------------------->
@@ -463,6 +485,9 @@ alert("クリップボードにコピーしました");
             <li>
                 noteIDおしたらNosTx（https://nostx.shino3.net/）が開かれるかも
             </li>
+            <li>
+                <div style="color:red">New [2023/04/22]</div> [拡張機能からpubkey取得]を押したときに、preferred relaysも取得するようになったかも
+            </li>
         </ul>
     </div>
     <!-------------------------------------------------------------------->
@@ -486,6 +511,19 @@ alert("クリップボードにコピーしました");
             placeholder="wss://..."
             style="width:350px"
         />
+        <!-------------------------リレーのリスト表示----------------->
+        {#if relays.length>1}
+        <!-- <button on:click={clickLisListView}>︙</button>
+        {#if isListView} -->
+        <select bind:value={relayName} class="relayList">
+            {#each relays as relaylist}
+                <option value={relaylist}>
+                    {relaylist}
+                </option>
+            {/each}
+        </select>
+        <!-- {/if} -->
+        {/if}
 
         取得するブックマークのカテゴリ名（デフォルトはbookmark)
         pinにするとSnortのピン留めリストがみれるよ:
@@ -681,5 +719,11 @@ alert("クリップボードにコピーしました");
     }
 .share{
   width:100%  
+}
+.relayList{
+    font-size: medium;
+        padding: 10px 10px 5px 10px;
+        margin: 5px;
+       
 }
 </style>
