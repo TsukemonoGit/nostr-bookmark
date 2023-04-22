@@ -54,6 +54,7 @@
         "wss://nostr.wine",
         "wss://universe.nostrich.land",
         "wss://relay.damus.io",
+        "wss://relay.nostr.band"
     ];
     /**
      * @type {{ [x: string]: string; identifier?: any; pubkey?: any; relays?: any; type?: string; data?: string | nip19.AddressPointer | nip19.ProfilePointer | nip19.EventPointer; }}
@@ -485,6 +486,14 @@ alert("クリップボードにコピーしました");
             <li>リレー接続Max5秒待ち</li>
             <li>
                 noteIDおしたらNosTx（https://nostx.shino3.net/）が開かれるかも
+            </li>
+            
+            <li>イベント検索は以下リレーで行っているよ
+                <ul><li>wss://nostr.wine</li>
+                    <li>wss://universe.nostrich.land</li>
+                        <li>wss://relay.damus.io</li>
+                            <li>wss://relay.nostr.band</li>
+            </ul>
             </li>
             <li>
                 <div style="color:red">New [2023/04/22]</div> [拡張機能からpubkey取得]を押したときに、preferred relaysも取得するようになったかも
